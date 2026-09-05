@@ -172,6 +172,11 @@ impl WindowBuilder for VersoWindowBuilder {
         self
     }
 
+    /// Unsupported, has no effect
+    fn focusable(self, focusable: bool) -> Self {
+        self
+    }
+
     fn maximized(mut self, maximized: bool) -> Self {
         self.verso_builder = self.verso_builder.maximized(maximized);
         self
@@ -232,6 +237,11 @@ impl WindowBuilder for VersoWindowBuilder {
 
     /// Unsupported, has no effect
     fn window_classname<S: Into<String>>(self, classname: S) -> Self {
+        self
+    }
+
+    /// Unsupported, has no effect
+    fn no_redirection_bitmap(self, enable: bool) -> Self {
         self
     }
 
@@ -767,12 +777,23 @@ impl<T: UserEvent> WindowDispatch<T> for VersoWindowDispatcher<T> {
         Ok(())
     }
 
+    /// Unsupported, has no effect when called
+    #[cfg(target_os = "macos")]
+    fn set_simple_fullscreen(&self, enable: bool) -> Result<()> {
+        Ok(())
+    }
+
     fn set_focus(&self) -> Result<()> {
         self.webview
             .lock()
             .unwrap()
             .focus()
             .map_err(|_| Error::FailedToSendMessage)?;
+        Ok(())
+    }
+
+    /// Unsupported, has no effect when called
+    fn set_focusable(&self, focusable: bool) -> Result<()> {
         Ok(())
     }
 

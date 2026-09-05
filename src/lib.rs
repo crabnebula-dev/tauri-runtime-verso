@@ -17,6 +17,26 @@
 //! + tauri-runtime-verso = { git = "https://github.com/versotile-org/tauri-runtime-verso.git" }
 //! ```
 //!
+//! This runtime is built against the upcoming Tauri v3 runtime API, which currently lives on the
+//! `feat/cef` branch, so you also need to patch the Tauri crates to it. Note that Cargo only honors
+//! `[patch]` sections from the workspace root, so this has to be in *your* manifest, not just in ours
+//!
+//! ```diff
+//! + [patch.crates-io]
+//! + tauri = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
+//! + tauri-build = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
+//! + tauri-plugin = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
+//! + tauri-runtime = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
+//! + tauri-utils = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
+//! ```
+//!
+//! If you use any of the official Tauri plugins, patch those to the matching `feat/cef` branch of
+//! the plugins workspace as well, the published releases don't build against this branch
+//!
+//! ```diff
+//! + tauri-plugin-opener = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "feat/cef" }
+//! ```
+//!
 //! In your build script, add the `tauri-runtime-verso-build` script, which will download the pre-built `versoview` to `versoview/versoview-{target-triple}`
 //!
 //! > Note we currently only have pre-built `versoview` for x64 Linux, Windows, MacOS and arm64 MacOS, also the download might take a bit of time if you have a slow internet connection

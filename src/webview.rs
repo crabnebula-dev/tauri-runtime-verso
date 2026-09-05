@@ -46,7 +46,7 @@ impl<T: UserEvent> WebviewDispatch<T> for VersoWebviewDispatcher<T> {
     }
 
     /// Unsupported, has no effect when called, the callback will not be called
-    fn with_webview<F: FnOnce(Box<dyn std::any::Any>) + Send + 'static>(&self, f: F) -> Result<()> {
+    fn with_webview<F: FnOnce(()) + Send + 'static>(&self, f: F) -> Result<()> {
         Ok(())
     }
 
@@ -62,6 +62,16 @@ impl<T: UserEvent> WebviewDispatch<T> for VersoWebviewDispatcher<T> {
             .execute_script(script.into())
             .map_err(|_| Error::FailedToSendMessage)?;
         Ok(())
+    }
+
+    /// The script is evaluated, but since Verso doesn't report the result back,
+    /// `callback` will never be called
+    fn eval_script_with_callback<S: Into<String>>(
+        &self,
+        script: S,
+        callback: impl Fn(String) + Send + 'static,
+    ) -> Result<()> {
+        self.eval_script(script)
     }
 
     fn url(&self) -> Result<String> {
@@ -201,6 +211,26 @@ impl<T: UserEvent> WebviewDispatch<T> for VersoWebviewDispatcher<T> {
         Ok(())
     }
 
+    /// Unsupported, has no effect when called
+    fn go_back(&self) -> Result<()> {
+        Ok(())
+    }
+
+    /// Unsupported, always returns false
+    fn can_go_back(&self) -> Result<bool> {
+        Ok(false)
+    }
+
+    /// Unsupported, has no effect when called
+    fn go_forward(&self) -> Result<()> {
+        Ok(())
+    }
+
+    /// Unsupported, always returns false
+    fn can_go_forward(&self) -> Result<bool> {
+        Ok(false)
+    }
+
     /// Unsupported, always returns an empty vector
     fn cookies_for_url(&self, url: Url) -> Result<Vec<tauri_runtime::Cookie<'static>>> {
         Ok(Vec::new())
@@ -209,5 +239,15 @@ impl<T: UserEvent> WebviewDispatch<T> for VersoWebviewDispatcher<T> {
     /// Unsupported, always returns an empty vector
     fn cookies(&self) -> Result<Vec<tauri_runtime::Cookie<'static>>> {
         Ok(Vec::new())
+    }
+
+    /// Unsupported, has no effect when called
+    fn set_cookie(&self, cookie: tauri_runtime::Cookie<'_>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Unsupported, has no effect when called
+    fn delete_cookie(&self, cookie: tauri_runtime::Cookie<'_>) -> Result<()> {
+        Ok(())
     }
 }

@@ -21,6 +21,23 @@ To get started, you need to add this crate to your project, and use `default-fea
 + tauri-runtime-verso = { git = "https://github.com/versotile-org/tauri-runtime-verso.git" }
 ```
 
+This runtime is built against the upcoming Tauri v3 runtime API, which currently lives on the `feat/cef` branch, so you also need to patch the Tauri crates to it. Note that Cargo only honors `[patch]` sections from the workspace root, so this has to be in *your* manifest, not just in ours
+
+```diff
++ [patch.crates-io]
++ tauri = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
++ tauri-build = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
++ tauri-plugin = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
++ tauri-runtime = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
++ tauri-utils = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
+```
+
+If you use any of the official Tauri plugins, patch those to the matching `feat/cef` branch of the plugins workspace as well, the published releases don't build against this branch
+
+```diff
++ tauri-plugin-opener = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "feat/cef" }
+```
+
 In your build script, add the `tauri-runtime-verso-build` script, which will download the pre-built `versoview` to `versoview/versoview-{target-triple}`
 
 > Note we currently only have pre-built `versoview` for x64 Linux, Windows, MacOS and arm64 MacOS, also the download might take a bit of time if you have a slow internet connection
@@ -65,20 +82,15 @@ Also, you can checkout the [documentation](https://versotile-org.github.io/tauri
 
 This error means either the path you set through `set_verso_path` is wrong (this should not be a problem if you're using the `externalBin` setup from the [Usage](#usage)) or the `versoview` exectuable requires a more recent version of glibc that your system doesn't have, in this case, you'll need to either update your linux distro or build `versoview` yourself
 
-#### Failed to select a version for ...
+#### Trait implementation errors on the Tauri crates
+
+Errors about missing trait items, unexpected method signatures, or `RootSchema` vs `Schema` mismatches mean the Tauri crates you're compiling against aren't the `feat/cef` ones. Make sure the `[patch.crates-io]` section from the [Usage](#usage) is in your workspace root `Cargo.toml`, then run `cargo update` — a `[patch]` that was added after the lock file was written is ignored until the affected packages are re-resolved
+
+`cargo check` reports which patches went unused:
 
 ```
-error: failed to select a version for `tauri-utils`.
-    ... required by package `tauri-runtime-verso v0.1.0 (https://github.com/versotile-org/tauri-runtime-verso.git#ad4815ef)`
-    ... which satisfies git dependency `tauri-runtime-verso` of package `testo v0.1.0 (/src/testo/src-tauri)`
-versions that meet the requirements `=2.6.0` are: 2.6.0
+warning: patch `tauri v2.11.5 (https://github.com/tauri-apps/tauri?branch=feat%2Fcef)` was not used in the crate graph
 ```
-
-> https://github.com/versotile-org/tauri-runtime-verso/issues/19
-
-To solve this, relax the version selection in your `Cargo.toml` file (e.g. `tauri = "2"` instead of `tauri = "2.8.5"`) and then run `cargo update`
-
-Since we rely on some unstable/non-semver compatible features of Tauri, we pinned a few tauri crates' versions, this sometimes causes package selection conflicts, and usually a `cargo update` would fix that
 
 If you rely on a feature in the latest Tauri which the Verso runtime doesn't support yet, file an [issue](https://github.com/versotile-org/tauri-runtime-verso/issues), or a [pull request](https://github.com/versotile-org/tauri-runtime-verso/pulls) would be much appreciated
 

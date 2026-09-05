@@ -171,6 +171,7 @@ impl<T: UserEvent> RuntimeContext<T> {
         let Some(pending_webview) = pending.webview else {
             return Err(tauri_runtime::Error::CreateWindow);
         };
+        let devtools = pending_webview.webview_attributes.devtools;
 
         let window_id = self.next_window_id();
         let webview_id = self.next_webview_id();
@@ -330,6 +331,7 @@ impl<T: UserEvent> RuntimeContext<T> {
                     },
                 },
                 use_https_scheme: false,
+                devtools,
             }),
         })
     }
@@ -510,24 +512,19 @@ impl<T: UserEvent> RuntimeHandle<T> for VersoRuntimeHandle<T> {
         self.context.run_on_main_thread(f)
     }
 
-    fn primary_monitor(&self) -> Option<Monitor> {
+    fn primary_monitor(&self) -> Result<Option<Monitor>> {
         self.context
             .run_on_main_thread_with_event_loop(|e| e.tauri_primary_monitor())
-            .ok()
-            .flatten()
     }
 
-    fn monitor_from_point(&self, x: f64, y: f64) -> Option<Monitor> {
+    fn monitor_from_point(&self, x: f64, y: f64) -> Result<Option<Monitor>> {
         self.context
             .run_on_main_thread_with_event_loop(move |e| e.tauri_monitor_from_point(x, y))
-            .ok()
-            .flatten()
     }
 
-    fn available_monitors(&self) -> Vec<Monitor> {
+    fn available_monitors(&self) -> Result<Vec<Monitor>> {
         self.context
             .run_on_main_thread_with_event_loop(|e| e.tauri_available_monitors())
-            .unwrap()
     }
 
     fn cursor_position(&self) -> Result<PhysicalPosition<f64>> {
@@ -563,6 +560,9 @@ impl<T: UserEvent> RuntimeHandle<T> for VersoRuntimeHandle<T> {
     fn hide(&self) -> Result<()> {
         Ok(())
     }
+
+    /// Unsupported, has no effect when called
+    fn set_device_event_filter(&self, filter: DeviceEventFilter) {}
 
     /// Unsupported, will always return an error
     fn display_handle(
@@ -635,7 +635,7 @@ impl<T: UserEvent> VersoRuntime<T> {
 
     fn init_with_builder(
         mut event_loop_builder: EventLoopBuilder<Message<T>>,
-        args: RuntimeInitArgs,
+        args: RuntimeInitArgs<()>,
     ) -> Self {
         #[cfg(windows)]
         if let Some(hook) = args.msg_hook {
@@ -663,20 +663,43 @@ impl<T: UserEvent> Runtime<T> for VersoRuntime<T> {
     type WebviewDispatcher = VersoWebviewDispatcher<T>;
     type Handle = VersoRuntimeHandle<T>;
     type EventLoopProxy = EventProxy<T>;
+    /// Unsupported, there is no platform specific webview attribute
+    type PlatformSpecificWebviewAttribute = ();
+    /// Unsupported, [`WebviewDispatch::with_webview`](tauri_runtime::WebviewDispatch::with_webview)
+    /// does not expose the underlying webview
+    type Webview = ();
+    /// Unsupported, there is no runtime specific initialization attribute
+    type RuntimeInitAttrs = ();
+    /// Unsupported, [`PendingWebview::new_window_handler`](tauri_runtime::webview::PendingWebview::new_window_handler)
+    /// is never called
+    type WindowOpener = ();
 
     /// `args.msg_hook` hooks on the event loop of this process,
     /// this doesn't work for the event loop of versoview instances
-    fn new(args: RuntimeInitArgs) -> Result<Self> {
+    fn new(args: RuntimeInitArgs<Self::RuntimeInitAttrs>) -> Result<Self> {
         let event_loop_builder = EventLoopBuilder::<Message<T>>::with_user_event();
         Ok(Self::init_with_builder(event_loop_builder, args))
     }
 
     /// `args.msg_hook` hooks on the event loop of this process,
     /// this doesn't work for the event loop of versoview instances
-    #[cfg(any(windows, target_os = "linux"))]
-    fn new_any_thread(args: RuntimeInitArgs) -> Result<Self> {
+    #[cfg(any(
+        windows,
+        target_os = "linux",
+        target_os = "dragonfly",
+        target_os = "freebsd",
+        target_os = "netbsd",
+        target_os = "openbsd"
+    ))]
+    fn new_any_thread(args: RuntimeInitArgs<Self::RuntimeInitAttrs>) -> Result<Self> {
         let mut event_loop_builder = EventLoopBuilder::<Message<T>>::with_user_event();
-        #[cfg(target_os = "linux")]
+        #[cfg(any(
+            target_os = "linux",
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "netbsd",
+            target_os = "openbsd"
+        ))]
         use tao::platform::unix::EventLoopBuilderExtUnix;
         #[cfg(windows)]
         use tao::platform::windows::EventLoopBuilderExtWindows;
@@ -768,6 +791,19 @@ impl<T: UserEvent> Runtime<T> for VersoRuntime<T> {
 
     /// Unsupported, has no effect when called
     fn set_device_event_filter(&mut self, filter: DeviceEventFilter) {}
+
+    /// Matches the wry runtime, on Windows the custom protocols are served
+    /// through `{http,https}://{scheme}.localhost` instead of `{scheme}://localhost`
+    fn custom_scheme_url(scheme: &str, https: bool) -> String {
+        if cfg!(windows) {
+            format!(
+                "{}://{scheme}.localhost",
+                if https { "https" } else { "http" }
+            )
+        } else {
+            format!("{scheme}://localhost")
+        }
+    }
 
     /// Unsupported, has no effect when called
     fn run_iteration<F: FnMut(RunEvent<T>)>(&mut self, callback: F) {}
