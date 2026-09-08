@@ -486,6 +486,27 @@ impl<T: UserEvent> RuntimeHandle<T> for VersoRuntimeHandle<T> {
         self.context.send_message(Message::RequestExit(code))
     }
 
+    /// Matches the wry runtime, on Windows the custom protocols are served
+    /// through `{http,https}://{scheme}.localhost` instead of `{scheme}://localhost`
+    fn custom_scheme_url(&self, scheme: &str, https: bool) -> String {
+        if cfg!(windows) {
+            format!(
+                "{}://{scheme}.localhost",
+                if https { "https" } else { "http" }
+            )
+        } else {
+            format!("{scheme}://localhost")
+        }
+    }
+
+    /// Unsupported, versoview does not report the version of the engine it runs,
+    /// this will always return an error
+    fn webview_version(&self) -> Result<String> {
+        Err(Error::WebviewVersion(
+            "versoview does not report its engine version".into(),
+        ))
+    }
+
     /// `after_window_creation` not supported
     ///
     /// Only creating the window with a webview is supported,
@@ -605,6 +626,32 @@ impl<T: UserEvent> EventLoopProxy<T> for EventProxy<T> {
     }
 }
 
+/// Runtime specific initialization attributes for [`VersoRuntime`].
+///
+/// Verso takes none, this type only exists to name the runtime: passing it to
+/// [`tauri::Builder::runtime`] is what selects this runtime on the type erased
+/// [`tauri::DynRuntime`], which is what [`tauri::Builder::default`] uses
+///
+/// ```rust,no_run
+/// tauri::Builder::default().runtime(tauri_runtime_verso::VersoRuntimeInitAttrs);
+/// ```
+///
+/// Note this only selects the runtime, it does not set up the invoke system Verso needs,
+/// so prefer [`crate::builder()`], which does both and gives you a statically typed
+/// `Builder<VersoRuntime>`
+#[derive(Debug, Default, Clone, Copy)]
+pub struct VersoRuntimeInitAttrs;
+
+impl<T: UserEvent> tauri_runtime::RuntimeInitAttrs<T> for VersoRuntimeInitAttrs {
+    type Runtime = VersoRuntime<T>;
+}
+
+impl<T: UserEvent> From<VersoRuntimeInitAttrs> for tauri_runtime::dynamic::DynRuntimeInitAttrs<T> {
+    fn from(attrs: VersoRuntimeInitAttrs) -> Self {
+        Self::new(attrs)
+    }
+}
+
 /// A Tauri Runtime wrapper around Verso.
 #[derive(Debug)]
 pub struct VersoRuntime<T: UserEvent = tauri::EventLoopMessage> {
@@ -635,7 +682,7 @@ impl<T: UserEvent> VersoRuntime<T> {
 
     fn init_with_builder(
         mut event_loop_builder: EventLoopBuilder<Message<T>>,
-        args: RuntimeInitArgs<()>,
+        args: RuntimeInitArgs<VersoRuntimeInitAttrs>,
     ) -> Self {
         #[cfg(windows)]
         if let Some(hook) = args.msg_hook {
@@ -664,12 +711,13 @@ impl<T: UserEvent> Runtime<T> for VersoRuntime<T> {
     type Handle = VersoRuntimeHandle<T>;
     type EventLoopProxy = EventProxy<T>;
     /// Unsupported, there is no platform specific webview attribute
-    type PlatformSpecificWebviewAttribute = ();
+    type RuntimeWebviewAttributes = ();
     /// Unsupported, [`WebviewDispatch::with_webview`](tauri_runtime::WebviewDispatch::with_webview)
     /// does not expose the underlying webview
     type Webview = ();
-    /// Unsupported, there is no runtime specific initialization attribute
-    type RuntimeInitAttrs = ();
+    /// Verso takes no runtime specific initialization attribute,
+    /// [`VersoRuntimeInitAttrs`] only selects this runtime
+    type RuntimeInitAttrs = VersoRuntimeInitAttrs;
     /// Unsupported, [`PendingWebview::new_window_handler`](tauri_runtime::webview::PendingWebview::new_window_handler)
     /// is never called
     type WindowOpener = ();
@@ -791,19 +839,6 @@ impl<T: UserEvent> Runtime<T> for VersoRuntime<T> {
 
     /// Unsupported, has no effect when called
     fn set_device_event_filter(&mut self, filter: DeviceEventFilter) {}
-
-    /// Matches the wry runtime, on Windows the custom protocols are served
-    /// through `{http,https}://{scheme}.localhost` instead of `{scheme}://localhost`
-    fn custom_scheme_url(scheme: &str, https: bool) -> String {
-        if cfg!(windows) {
-            format!(
-                "{}://{scheme}.localhost",
-                if https { "https" } else { "http" }
-            )
-        } else {
-            format!("{scheme}://localhost")
-        }
-    }
 
     /// Unsupported, has no effect when called
     fn run_iteration<F: FnMut(RunEvent<T>)>(&mut self, callback: F) {}

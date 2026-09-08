@@ -8,7 +8,7 @@ A tauri runtime to replace the backend with [Verso](https://github.com/tauri-app
 
 ## Usage
 
-To get started, you need to add this crate to your project, and use `default-feature = false` on `tauri` to disable the `wry` feature
+To get started, you need to add this crate to your project
 
 ```diff
   [build-dependencies]
@@ -16,8 +16,7 @@ To get started, you need to add this crate to your project, and use `default-fea
 + tauri-runtime-verso-build = { git = "https://github.com/versotile-org/tauri-runtime-verso.git" }
 
   [dependencies]
-- tauri = { version = "2", features = [] }
-+ tauri = { version = "2", default-features = false, features = ["common-controls-v6"] }
+  tauri = { version = "2", features = [] }
 + tauri-runtime-verso = { git = "https://github.com/versotile-org/tauri-runtime-verso.git" }
 ```
 
@@ -125,8 +124,8 @@ We currently only support Linux, Windows, MacOS, so no mobile (e.g. Android / iO
 If your app targets both desktop and mobile and want to use this runtime only on desktop, you'll need to:
 
 - Include the crates in this repo only in desktop target dependencies
-- Enable `wry` feature on `tauri` when targeting mobile
-- Use `tauri::Builder::new()` instead of `tauri_runtime_verso::builder()` on mobile
+- Depend on `tauri-runtime-wry` when targeting mobile, the `tauri` crate no longer ships a webview runtime of its own, so there is no `wry` feature to enable anymore
+- Use `tauri::Builder::default().runtime(tauri_runtime_wry::Wry::default())` instead of `tauri_runtime_verso::builder()` on mobile
 - Add checks to only run `get_verso_as_external_bin` when targeting desktop
 - Add `externalBin` only for desktop platforms, either through [tauri conf file for each platform](https://tauri.app/reference/config/#platform-specific-configuration) or `--config` flag to target a different configuration file that contains the `externalBin` field
 

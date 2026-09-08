@@ -21,7 +21,7 @@ macos-private-api = ["tauri-runtime/macos-private-api"]
 
 [dependencies]
 verso = { workspace = true }
-tauri = { version = "2", default-features = false }
+tauri = { version = "2" }
 tauri-runtime = "2"
 tauri-utils = "2"
 tao = "0.34"
@@ -46,6 +46,8 @@ tauri-build = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef"
 tauri-plugin = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
 tauri-runtime = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
 tauri-utils = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
+tauri-codegen = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
+tauri-macros = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
 # The published plugins don't build against the schemars 1.x used by the branch above
 tauri-plugin-log = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "feat/cef" }
 tauri-plugin-opener = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "feat/cef" }

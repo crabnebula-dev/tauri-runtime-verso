@@ -4,7 +4,7 @@
 //!
 //! ## Usage
 //!
-//! To get started, you need to add this crate to your project, and use `default-feature = false` on `tauri` to disable the `wry` feature
+//! To get started, you need to add this crate to your project
 //!
 //! ```diff
 //!   [build-dependencies]
@@ -12,8 +12,7 @@
 //! + tauri-runtime-verso-build = { git = "https://github.com/versotile-org/tauri-runtime-verso.git" }
 //!
 //!   [dependencies]
-//! - tauri = { version = "2", features = [] }
-//! + tauri = { version = "2", default-features = false, features = ["common-controls-v6"] }
+//!   tauri = { version = "2", features = [] }
 //! + tauri-runtime-verso = { git = "https://github.com/versotile-org/tauri-runtime-verso.git" }
 //! ```
 //!
@@ -96,7 +95,9 @@ mod utils;
 mod webview;
 mod window;
 
-pub use runtime::{EventProxy, RuntimeContext, VersoRuntime, VersoRuntimeHandle};
+pub use runtime::{
+    EventProxy, RuntimeContext, VersoRuntime, VersoRuntimeHandle, VersoRuntimeInitAttrs,
+};
 pub use webview::VersoWebviewDispatcher;
 pub use window::{VersoWindowBuilder, VersoWindowDispatcher};
 
