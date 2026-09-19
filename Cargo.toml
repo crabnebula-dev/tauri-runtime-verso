@@ -21,9 +21,9 @@ macos-private-api = ["tauri-runtime/macos-private-api"]
 
 [dependencies]
 verso = { workspace = true }
-tauri = { version = "2" }
-tauri-runtime = "2"
-tauri-utils = "2"
+tauri = { version = "3.0.0-alpha" }
+tauri-runtime = "3.0.0-alpha"
+tauri-utils = "3.0.0-alpha"
 tao = "0.34"
 raw-window-handle = "0.6"
 url = "2"
@@ -39,18 +39,6 @@ gtk = { version = "0.18", features = ["v3_24"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2-app-kit = { version = "0.3", features = ["NSScreen"] }
-
-[patch.crates-io]
-tauri = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
-tauri-build = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
-tauri-plugin = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
-tauri-runtime = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
-tauri-utils = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
-tauri-codegen = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
-tauri-macros = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
-# The published plugins don't build against the schemars 1.x used by the branch above
-tauri-plugin-log = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "feat/cef" }
-tauri-plugin-opener = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "feat/cef" }
 
 [patch."https://github.com/tauri-apps/verso"]
 # verso = { path = "../verso/verso" }

@@ -5,9 +5,9 @@ edition = "2024"
 
 [build-dependencies]
 tauri-runtime-verso-build = { path = "../../tauri-runtime-verso-build" }
-tauri-build = { version = "2", features = [] }
+tauri-build = { version = "3.0.0-alpha", features = [] }
 
 [dependencies]
-tauri = { version = "2" }
+tauri = { version = "3.0.0-alpha" }
 tauri-runtime-verso = { path = "../../" }
 # serde = "1"

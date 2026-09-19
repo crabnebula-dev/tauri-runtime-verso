@@ -8,33 +8,17 @@
 //!
 //! ```diff
 //!   [build-dependencies]
-//!   tauri-build = "2"
+//!   tauri-build = "3.0.0-alpha"
 //! + tauri-runtime-verso-build = { git = "https://github.com/versotile-org/tauri-runtime-verso.git" }
 //!
 //!   [dependencies]
-//!   tauri = { version = "2", features = [] }
+//!   tauri = { version = "3.0.0-alpha", features = [] }
 //! + tauri-runtime-verso = { git = "https://github.com/versotile-org/tauri-runtime-verso.git" }
 //! ```
 //!
-//! This runtime is built against the upcoming Tauri v3 runtime API, which currently lives on the
-//! `feat/cef` branch, so you also need to patch the Tauri crates to it. Note that Cargo only honors
-//! `[patch]` sections from the workspace root, so this has to be in *your* manifest, not just in ours
-//!
-//! ```diff
-//! + [patch.crates-io]
-//! + tauri = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
-//! + tauri-build = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
-//! + tauri-plugin = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
-//! + tauri-runtime = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
-//! + tauri-utils = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
-//! ```
-//!
-//! If you use any of the official Tauri plugins, patch those to the matching `feat/cef` branch of
-//! the plugins workspace as well, the published releases don't build against this branch
-//!
-//! ```diff
-//! + tauri-plugin-opener = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "feat/cef" }
-//! ```
+//! This runtime is built against the Tauri v3 runtime API, so your app needs to be on the
+//! `3.0.0-alpha` releases of the Tauri crates (and the matching `3.0.0-alpha` releases of any
+//! official plugins and the `@tauri-apps/*` npm packages)
 //!
 //! In your build script, add the `tauri-runtime-verso-build` script, which will download the pre-built `versoview` to `versoview/versoview-{target-triple}`
 //!

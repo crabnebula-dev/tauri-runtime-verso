@@ -12,30 +12,15 @@ To get started, you need to add this crate to your project
 
 ```diff
   [build-dependencies]
-  tauri-build = "2"
+  tauri-build = "3.0.0-alpha"
 + tauri-runtime-verso-build = { git = "https://github.com/versotile-org/tauri-runtime-verso.git" }
 
   [dependencies]
-  tauri = { version = "2", features = [] }
+  tauri = { version = "3.0.0-alpha", features = [] }
 + tauri-runtime-verso = { git = "https://github.com/versotile-org/tauri-runtime-verso.git" }
 ```
 
-This runtime is built against the upcoming Tauri v3 runtime API, which currently lives on the `feat/cef` branch, so you also need to patch the Tauri crates to it. Note that Cargo only honors `[patch]` sections from the workspace root, so this has to be in *your* manifest, not just in ours
-
-```diff
-+ [patch.crates-io]
-+ tauri = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
-+ tauri-build = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
-+ tauri-plugin = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
-+ tauri-runtime = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
-+ tauri-utils = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
-```
-
-If you use any of the official Tauri plugins, patch those to the matching `feat/cef` branch of the plugins workspace as well, the published releases don't build against this branch
-
-```diff
-+ tauri-plugin-opener = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "feat/cef" }
-```
+This runtime is built against the Tauri v3 runtime API, so your app needs to be on the `3.0.0-alpha` releases of the Tauri crates (and the matching `3.0.0-alpha` releases of any official plugins and the `@tauri-apps/*` npm packages)
 
 In your build script, add the `tauri-runtime-verso-build` script, which will download the pre-built `versoview` to `versoview/versoview-{target-triple}`
 
@@ -83,13 +68,7 @@ This error means either the path you set through `set_verso_path` is wrong (this
 
 #### Trait implementation errors on the Tauri crates
 
-Errors about missing trait items, unexpected method signatures, or `RootSchema` vs `Schema` mismatches mean the Tauri crates you're compiling against aren't the `feat/cef` ones. Make sure the `[patch.crates-io]` section from the [Usage](#usage) is in your workspace root `Cargo.toml`, then run `cargo update` — a `[patch]` that was added after the lock file was written is ignored until the affected packages are re-resolved
-
-`cargo check` reports which patches went unused:
-
-```
-warning: patch `tauri v2.11.5 (https://github.com/tauri-apps/tauri?branch=feat%2Fcef)` was not used in the crate graph
-```
+Errors about missing trait items, unexpected method signatures, or `RootSchema` vs `Schema` mismatches mean the Tauri crates you're compiling against aren't the v3 ones, usually because a `tauri = "2"` requirement somewhere in your dependency graph pulled in a second copy. Make sure everything depends on the `3.0.0-alpha` releases as shown in [Usage](#usage), then run `cargo update`, and use `cargo tree -i tauri` to find who still pulls in a v2 copy
 
 If you rely on a feature in the latest Tauri which the Verso runtime doesn't support yet, file an [issue](https://github.com/versotile-org/tauri-runtime-verso/issues), or a [pull request](https://github.com/versotile-org/tauri-runtime-verso/pulls) would be much appreciated
 

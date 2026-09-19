@@ -5,15 +5,15 @@ edition = "2024"
 
 [build-dependencies]
 tauri-runtime-verso-build = { path = "../../../tauri-runtime-verso-build" }
-tauri-build = { version = "2", features = [] }
+tauri-build = { version = "3.0.0-alpha", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [
+tauri = { version = "3.0.0-alpha", features = [
     # Additional features
     "tray-icon",
 ] }
 serde_json = "1"
 log = "0.4"
-tauri-plugin-log = "2"
-tauri-plugin-opener = "2"
+tauri-plugin-log = "3.0.0-alpha"
+tauri-plugin-opener = "3.0.0-alpha"
 tauri-runtime-verso = { path = "../../../" }
