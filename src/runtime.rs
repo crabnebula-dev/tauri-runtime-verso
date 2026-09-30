@@ -169,7 +169,9 @@ impl<T: UserEvent> RuntimeContext<T> {
     ) -> Result<DetachedWindow<T, R>> {
         let label = pending.label;
         let Some(pending_webview) = pending.webview else {
-            return Err(tauri_runtime::Error::CreateWindow);
+            return Err(tauri_runtime::Error::CreateWindow(
+                "a window must have a webview".into(),
+            ));
         };
         let devtools = pending_webview.webview_attributes.devtools;
 
@@ -283,7 +285,7 @@ impl<T: UserEvent> RuntimeContext<T> {
                 }
                 response_fn(None);
             })
-            .map_err(|_| tauri_runtime::Error::CreateWindow)?;
+            .map_err(|e| tauri_runtime::Error::CreateWindow(e.into()))?;
 
         if let Some(navigation_handler) = pending_webview.navigation_handler {
             if let Err(error) = webview.on_navigation_starting(move |url| navigation_handler(&url))
@@ -299,7 +301,7 @@ impl<T: UserEvent> RuntimeContext<T> {
             .on_close_requested(move || {
                 let _ = sender.send_event(Message::CloseWindow(window_id));
             })
-            .map_err(|_| tauri_runtime::Error::CreateWindow)?;
+            .map_err(|e| tauri_runtime::Error::CreateWindow(e.into()))?;
 
         let on_window_event_listeners = Arc::new(Mutex::new(HashMap::new()));
 
@@ -525,7 +527,9 @@ impl<T: UserEvent> RuntimeHandle<T> for VersoRuntimeHandle<T> {
         window_id: WindowId,
         pending: PendingWebview<T, Self::Runtime>,
     ) -> Result<DetachedWebview<T, Self::Runtime>> {
-        Err(tauri_runtime::Error::CreateWindow)
+        Err(tauri_runtime::Error::CreateWindow(
+            "creating a webview is not supported".into(),
+        ))
     }
 
     /// Run a task on the main thread.
@@ -783,7 +787,9 @@ impl<T: UserEvent> Runtime<T> for VersoRuntime<T> {
         window_id: WindowId,
         pending: PendingWebview<T, Self>,
     ) -> Result<DetachedWebview<T, Self>> {
-        Err(tauri_runtime::Error::CreateWindow)
+        Err(tauri_runtime::Error::CreateWindow(
+            "creating a webview is not supported".into(),
+        ))
     }
 
     fn primary_monitor(&self) -> Option<Monitor> {
@@ -831,6 +837,11 @@ impl<T: UserEvent> Runtime<T> for VersoRuntime<T> {
     #[cfg(target_os = "macos")]
     #[cfg_attr(docsrs, doc(cfg(target_os = "macos")))]
     fn hide(&self) {}
+
+    /// Unsupported, has no effect
+    #[cfg(target_os = "macos")]
+    #[cfg_attr(docsrs, doc(cfg(target_os = "macos")))]
+    fn set_activate_ignoring_other_apps(&mut self, ignore: bool) {}
 
     /// Unsupported, has no effect
     #[cfg(target_os = "macos")]

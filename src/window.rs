@@ -187,6 +187,15 @@ impl WindowBuilder for VersoWindowBuilder {
         self
     }
 
+    #[allow(unused_mut)]
+    fn transparent(mut self, transparent: bool) -> Self {
+        #[cfg(any(not(target_os = "macos"), feature = "macos-private-api"))]
+        {
+            self.verso_builder = self.verso_builder.transparent(transparent);
+        }
+        self
+    }
+
     fn decorations(mut self, decorations: bool) -> Self {
         self.verso_builder = self.verso_builder.decorated(decorations);
         self
@@ -328,16 +337,6 @@ impl WindowBuilder for VersoWindowBuilder {
     /// Unsupported, has no effect
     #[cfg(windows)]
     fn parent(self, parent: HWND) -> Self {
-        self
-    }
-
-    #[cfg(any(not(target_os = "macos"), feature = "macos-private-api"))]
-    #[cfg_attr(
-        docsrs,
-        doc(cfg(any(not(target_os = "macos"), feature = "macos-private-api")))
-    )]
-    fn transparent(mut self, transparent: bool) -> Self {
-        self.verso_builder = self.verso_builder.transparent(transparent);
         self
     }
 
@@ -598,7 +597,9 @@ impl<T: UserEvent> WindowDispatch<T> for VersoWindowDispatcher<T> {
         &mut self,
         pending: PendingWebview<T, Self::Runtime>,
     ) -> Result<DetachedWebview<T, Self::Runtime>> {
-        Err(tauri_runtime::Error::CreateWindow)
+        Err(tauri_runtime::Error::CreateWindow(
+            "creating a webview is not supported".into(),
+        ))
     }
 
     /// Unsupported, has no effect when called
@@ -774,6 +775,11 @@ impl<T: UserEvent> WindowDispatch<T> for VersoWindowDispatcher<T> {
             .unwrap()
             .set_fullscreen(fullscreen)
             .map_err(|_| Error::FailedToSendMessage)?;
+        Ok(())
+    }
+
+    /// Unsupported, has no effect when called
+    fn set_fullscreen_on_monitor(&self, position: PhysicalPosition<f64>) -> Result<()> {
         Ok(())
     }
 

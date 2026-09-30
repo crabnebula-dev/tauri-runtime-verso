@@ -21,9 +21,9 @@ macos-private-api = ["tauri-runtime/macos-private-api"]
 
 [dependencies]
 verso = { workspace = true }
-tauri = { version = "3.0.0-alpha" }
-tauri-runtime = "3.0.0-alpha"
-tauri-utils = "3.0.0-alpha"
+tauri = { version = "3.0.0-alpha.3" }
+tauri-runtime = "3.0.0-alpha.2"
+tauri-utils = "3.0.0-alpha.2"
 tao = "0.34"
 raw-window-handle = "0.6"
 url = "2"
