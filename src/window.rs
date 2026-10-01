@@ -187,12 +187,8 @@ impl WindowBuilder for VersoWindowBuilder {
         self
     }
 
-    #[allow(unused_mut)]
     fn transparent(mut self, transparent: bool) -> Self {
-        #[cfg(any(not(target_os = "macos"), feature = "macos-private-api"))]
-        {
-            self.verso_builder = self.verso_builder.transparent(transparent);
-        }
+        self.verso_builder = self.verso_builder.transparent(transparent);
         self
     }
 

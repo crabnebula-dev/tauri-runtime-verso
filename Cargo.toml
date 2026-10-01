@@ -15,15 +15,11 @@ members = [
 verso = { git = "https://github.com/tauri-apps/verso", rev = "572f47ca7ead69ce3e8b0c433e5cff237f0514c9" }
 versoview_build = { git = "https://github.com/tauri-apps/verso", rev = "572f47ca7ead69ce3e8b0c433e5cff237f0514c9" }
 
-[features]
-# Required if you use tauri's macos-private-api feature
-macos-private-api = ["tauri-runtime/macos-private-api"]
-
 [dependencies]
 verso = { workspace = true }
-tauri = { version = "3.0.0-alpha.3" }
-tauri-runtime = "3.0.0-alpha.2"
-tauri-utils = "3.0.0-alpha.2"
+tauri = { version = "3.0.0-alpha.4" }
+tauri-runtime = "3.0.0-alpha.3"
+tauri-utils = "3.0.0-alpha.3"
 tao = "0.34"
 raw-window-handle = "0.6"
 url = "2"

@@ -67,10 +67,6 @@
 //! ```
 //!
 //! Then go to `about:debugging` in Firefox and connect to `localhost:1234` there
-//!
-//! ## Cargo features
-//!
-//! - **macos-private-api**: Matching with Tauri's macos-private-api feature, required if you use that
 
 mod event_loop_ext;
 mod monitor;
