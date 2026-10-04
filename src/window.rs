@@ -269,7 +269,7 @@ impl WindowBuilder for VersoWindowBuilder {
         target_os = "netbsd",
         target_os = "openbsd"
     ))]
-    fn transient_for(self, parent: &impl gtk::glib::IsA<gtk::Window>) -> Self {
+    fn transient_for(self, parent: *mut std::ffi::c_void) -> Self {
         self
     }
 
@@ -550,7 +550,7 @@ impl<T: UserEvent> WindowDispatch<T> for VersoWindowDispatcher<T> {
         target_os = "netbsd",
         target_os = "openbsd"
     ))]
-    fn gtk_window(&self) -> Result<gtk::ApplicationWindow> {
+    fn gtk_window(&self) -> Result<*mut std::ffi::c_void> {
         unimplemented!()
     }
 
@@ -562,7 +562,7 @@ impl<T: UserEvent> WindowDispatch<T> for VersoWindowDispatcher<T> {
         target_os = "netbsd",
         target_os = "openbsd"
     ))]
-    fn default_vbox(&self) -> Result<gtk::Box> {
+    fn default_vbox(&self) -> Result<*mut std::ffi::c_void> {
         unimplemented!()
     }
 
